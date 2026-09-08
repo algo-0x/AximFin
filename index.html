@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#4f46e5">
+<title>Axim Financial Solution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --primary: #4f46e5;
+  --primary-dark: #4338ca;
+  --primary-light: #eef2ff;
+  --success: #10b981;
+  --success-bg: #d1fae5;
+  --danger: #ef4444;
+  --danger-bg: #fee2e2;
+  --warning: #f59e0b;
+  --text-dark: #111827;
+  --text-mid: #4b5563;
+  --text-light: #9ca3af;
+  --border: #e5e7eb;
+  --bg-soft: #f9fafb;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(17,24,39,0.06);
+  --shadow-hover: 0 8px 32px rgba(17,24,39,0.10);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { -webkit-text-size-adjust:100%; }
+body {
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:#f3f4f8;
+  min-height:100vh;
+  min-height:100dvh;
+  color:var(--text-dark);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+.hidden { display:none !important; }
+a { color:inherit; }
+button, input, select { font-family:inherit; }
+
+/* ============ SPLASH / BOOT LOADER ============ */
+#bootLoader {
+  position:fixed; inset:0; background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999;
+  color:white; gap:18px; padding:20px; text-align:center;
+}
+.boot-logo { font-size:clamp(32px,8vw,42px); }
+.boot-spinner {
+  width:36px; height:36px; border:4px solid rgba(255,255,255,0.3); border-top-color:white;
+  border-radius:50%; animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.boot-text { font-size:13.5px; opacity:0.85; letter-spacing:0.3px; }
+
+/* ============ TOASTS ============ */
+#toastContainer {
+  position:fixed; top:12px; right:12px; left:12px; z-index:9998; display:flex; flex-direction:column; gap:8px;
+  max-width:340px; width:auto; margin-left:auto;
+}
+.toast {
+  background:white; border-radius:10px; padding:12px 16px; box-shadow:var(--shadow-hover);
+  display:flex; align-items:flex-start; gap:10px; font-size:13.5px; font-weight:500;
+  animation:slideIn 0.3s ease, fadeOut 0.4s ease 3.6s forwards; border-left:4px solid var(--primary);
+}
+.toast.success { border-color:var(--success); }
+.toast.error { border-color:var(--danger); }
+.toast i { font-size:16px; margin-top:1px; flex-shrink:0; }
+.toast.success i { color:var(--success); }
+.toast.error i { color:var(--danger); }
+.toast.info i { color:var(--primary); }
+@keyframes slideIn { from{transform:translateX(120%); opacity:0;} to{transform:translateX(0); opacity:1;} }
+@keyframes fadeOut { to{opacity:0; transform:translateX(30px);} }
+
+/* ============ AUTH PAGE ============ */
+.auth-container {
+  display:flex; justify-content:center; align-items:center; min-height:100vh; min-height:100dvh;
+  padding:20px; background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);
+}
+.auth-card {
+  background:white; padding:36px 26px; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,0.25);
+  width:100%; max-width:400px;
+}
+.brand-title { text-align:center; font-size:clamp(19px,5vw,23px); font-weight:800; color:var(--text-dark); letter-spacing:-0.3px; }
+.brand-sub { text-align:center; font-size:11.5px; color:var(--text-light); margin-top:4px; margin-bottom:6px; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; }
+.subtitle { text-align:center; color:var(--text-mid); margin-bottom:24px; font-size:13.5px; }
+.input-group { position:relative; margin-bottom:14px; }
+.input-group i { position:absolute; left:15px; top:50%; transform:translateY(-50%); color:var(--text-light); font-size:14px; }
+.auth-card input {
+  width:100%; padding:14px 16px 14px 40px; border:1.5px solid var(--border); border-radius:10px;
+  font-size:16px; transition:border-color 0.2s, box-shadow 0.2s; font-family:inherit;
+}
+.auth-card input:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-light); }
+.auth-card button {
+  width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:10px;
+  font-size:15px; font-weight:700; cursor:pointer; transition:background 0.2s, transform 0.1s; margin-top:4px;
+  min-height:48px;
+}
+.auth-card button:hover { background:var(--primary-dark); }
+.auth-card button:active { transform:scale(0.98); }
+.auth-card button:disabled { opacity:0.6; cursor:not-allowed; }
+.error { color:var(--danger); text-align:center; margin-top:12px; font-weight:500; font-size:13px; min-height:18px; }
+
+/* ============ NAVBAR ============ */
+.navbar {
+  background:white; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;
+  box-shadow:0 1px 0 var(--border); position:sticky; top:0; z-index:100; gap:8px;
+}
+.nav-brand { display:flex; align-items:center; gap:10px; min-width:0; }
+.nav-logo {
+  width:34px; height:34px; background:linear-gradient(135deg,#4f46e5,#7c3aed); border-radius:9px;
+  display:flex; align-items:center; justify-content:center; color:white; font-size:14px; font-weight:800; flex-shrink:0;
+}
+.nav-titles { line-height:1.2; min-width:0; }
+.nav-titles .t1 { font-size:14px; font-weight:800; color:var(--text-dark); letter-spacing:-0.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.nav-titles .t2 { font-size:9.5px; color:var(--text-light); font-weight:600; letter-spacing:0.3px; }
+.nav-user { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.user-chip { display:flex; align-items:center; gap:6px; background:var(--bg-soft); padding:5px 11px 5px 5px; border-radius:20px; }
+.user-avatar {
+  width:24px; height:24px; border-radius:50%; background:var(--primary); color:white; font-size:11px;
+  font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.user-name-txt { font-size:12.5px; font-weight:600; color:var(--text-dark); max-width:90px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.live-badge { display:inline-flex; align-items:center; gap:5px; background:var(--success-bg); color:#065f46; padding:5px 10px; border-radius:20px; font-size:10.5px; font-weight:700; flex-shrink:0; }
+.live-dot { width:6px; height:6px; background:var(--success); border-radius:50%; animation:pulse 1.6s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+.btn-logout {
+  padding:8px 12px; background:white; color:var(--danger); border:1.5px solid var(--danger-bg); border-radius:9px;
+  cursor:pointer; font-weight:700; font-size:12px; transition:background 0.2s; flex-shrink:0; min-height:36px;
+}
+.btn-logout span { display:none; }
+.btn-logout:hover { background:var(--danger-bg); }
+
+.offline-bar {
+  background:#fef3c7; color:#92400e; text-align:center; padding:8px 12px; font-size:12.5px; font-weight:600;
+}
+
+/* ============ DASHBOARD ============ */
+.dashboard-container { max-width:1300px; margin:0 auto; padding:16px 12px 40px; }
+.summary-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; margin-bottom:16px; }
+.card {
+  background:white; padding:16px; border-radius:var(--radius); box-shadow:var(--shadow); display:flex;
+  align-items:center; gap:12px; transition:box-shadow 0.25s, transform 0.25s; position:relative; overflow:hidden;
+}
+.card:hover { box-shadow:var(--shadow-hover); }
+.card.updated::after {
+  content:''; position:absolute; inset:0; background:rgba(79,70,229,0.08); animation:flashOverlay 1s ease;
+}
+@keyframes flashOverlay { 0%{opacity:1;} 100%{opacity:0;} }
+.card-icon-wrap {
+  width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  font-size:18px; flex-shrink:0;
+}
+.card-icon-wrap.invested { background:#eef2ff; color:var(--primary); }
+.card-icon-wrap.current { background:#ecfdf5; color:var(--success); }
+.card-icon-wrap.pnl { background:#fff7ed; color:var(--warning); }
+.card-content { min-width:0; }
+.card-content h3 { color:var(--text-light); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:4px; }
+.card-content p { font-size:19px; font-weight:800; color:var(--text-dark); letter-spacing:-0.3px; word-break:break-word; }
+.card-content small { font-size:12px; font-weight:700; display:inline-block; margin-top:2px; }
+
+.skeleton { background:linear-gradient(90deg,#eef0f3 25%,#f8f9fb 37%,#eef0f3 63%); background-size:400% 100%; animation:skeletonShine 1.4s ease infinite; border-radius:6px; display:inline-block; }
+@keyframes skeletonShine { 0%{background-position:100% 50%;} 100%{background-position:0 50%;} }
+.skeleton-text { height:14px; width:70%; }
+.skeleton-number { height:22px; width:80px; }
+
+.filter-section {
+  background:white; padding:14px; border-radius:var(--radius); margin-bottom:16px; display:flex;
+  align-items:center; gap:8px; flex-wrap:wrap; box-shadow:var(--shadow);
+}
+.filter-section label { font-weight:700; color:var(--text-mid); font-size:12.5px; width:100%; margin-bottom:2px; }
+.filter-section input[type="date"] {
+  padding:10px 12px; border:1.5px solid var(--border); border-radius:9px; font-size:13.5px; font-family:inherit;
+  flex:1; min-width:130px;
+}
+.filter-section input[type="date"]:focus { outline:none; border-color:var(--primary); }
+.filter-sep { color:var(--text-light); font-size:12px; flex-shrink:0; }
+.filter-btn-row { display:flex; gap:8px; width:100%; margin-top:4px; }
+.filter-btn { padding:10px 16px; border:none; border-radius:9px; cursor:pointer; font-weight:700; font-size:13px; transition:background 0.2s; flex:1; min-height:40px; }
+.filter-btn.apply { background:var(--primary); color:white; }
+.filter-btn.apply:hover { background:var(--primary-dark); }
+.filter-btn.reset { background:var(--bg-soft); color:var(--text-mid); }
+.filter-btn.reset:hover { background:var(--border); }
+
+.section-card { background:white; padding:16px; border-radius:var(--radius); margin-bottom:16px; box-shadow:var(--shadow); }
+.section-title { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+.section-title i { color:var(--primary); font-size:15px; }
+.section-title h2 { font-size:14.5px; font-weight:800; color:var(--text-dark); }
+
+.table-container { overflow-x:auto; margin:0 -16px; padding:0 16px; -webkit-overflow-scrolling:touch; }
+table { width:100%; border-collapse:collapse; min-width:560px; }
+th, td { padding:11px 10px; text-align:left; border-bottom:1px solid var(--border); font-size:12.5px; white-space:nowrap; }
+td.notes-cell { white-space:normal; }
+th { background:var(--bg-soft); font-weight:700; color:var(--text-mid); font-size:10px; text-transform:uppercase; letter-spacing:0.3px; }
+tbody tr { transition:background 0.15s; }
+tbody tr:active { background:var(--bg-soft); }
+.datetime { font-weight:700; color:var(--text-dark); }
+.time { color:var(--text-light); font-size:10.5px; }
+.type-badge { padding:4px 9px; border-radius:20px; font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.2px; white-space:nowrap; }
+.type-badge.deposit { background:var(--success-bg); color:#065f46; }
+.type-badge.withdrawal { background:var(--danger-bg); color:#991b1b; }
+.type-badge.trade { background:#dbeafe; color:#1e40af; }
+.positive { color:var(--success); font-weight:700; }
+.negative { color:var(--danger); font-weight:700; }
+.notes-cell { color:var(--text-mid); max-width:140px; overflow:hidden; text-overflow:ellipsis; }
+
+.empty-state { text-align:center; padding:40px 16px; color:var(--text-light); }
+.empty-state i { font-size:32px; margin-bottom:10px; opacity:0.5; display:block; }
+.empty-state p { font-size:13px; font-weight:500; }
+
+tr.new-row { animation:rowHighlight 2s ease; }
+@keyframes rowHighlight { 0%{background:#fef9c3;} 100%{background:transparent;} }
+
+.chart-container { height:260px; position:relative; }
+
+.footer-note { text-align:center; color:var(--text-light); font-size:11px; margin-top:20px; padding-bottom:10px; line-height:1.6; }
+
+/* ============ TABLET ============ */
+@media (min-width:481px) and (max-width:768px) {
+  .chart-container { height:300px; }
+}
+
+/* ============ DESKTOP ENHANCEMENTS ============ */
+@media (min-width:769px) {
+  .navbar { padding:14px 28px; }
+  .nav-logo { width:38px; height:38px; font-size:16px; }
+  .nav-titles .t1 { font-size:16.5px; }
+  .nav-titles .t2 { font-size:11px; }
+  .user-name-txt { max-width:none; }
+  .live-badge { font-size:11.5px; padding:5px 12px; }
+  .btn-logout { padding:9px 16px; font-size:13px; }
+  .btn-logout span { display:inline; margin-left:6px; }
+  .dashboard-container { padding:28px 24px 60px; }
+  .summary-cards { gap:18px; margin-bottom:24px; }
+  .card { padding:22px; gap:16px; }
+  .card-icon-wrap { width:52px; height:52px; font-size:22px; }
+  .card-content p { font-size:24px; }
+  .filter-section { padding:18px 22px; gap:12px; }
+  .filter-section label { width:auto; margin-bottom:0; }
+  .filter-btn-row { width:auto; margin-top:0; }
+  .filter-btn { flex:none; }
+  .section-card { padding:24px; }
+  .section-title { margin-bottom:18px; }
+  .section-title h2 { font-size:16.5px; }
+  .chart-container { height:360px; }
+  .footer-note { font-size:12px; margin-top:30px; }
+}
+
+/* ============ SMALL PHONES ============ */
+@media (max-width:380px) {
+  .nav-titles .t1 { font-size:12.5px; }
+  .user-chip { display:none; }
+  .card-content p { font-size:17px; }
+  th, td { font-size:11.5px; padding:9px 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- BOOT LOADER -->
+<div id="bootLoader">
+  <div class="boot-logo"><i class="fas fa-chart-line"></i></div>
+  <div class="boot-spinner"></div>
+  <div class="boot-text">Loading Axim Financial Solution...</div>
+</div>
+
+<div id="toastContainer"></div>
+
+<!-- LOGIN PAGE -->
+<div id="authPage" class="auth-container hidden">
+  <div class="auth-card">
+    <div class="brand-title">Axim Financial Solution</div>
+    <div class="brand-sub">by GreenOOH</div>
+    <p class="subtitle">Sign in to track your portfolio</p>
+
+    <div class="input-group">
+      <i class="fas fa-envelope"></i>
+      <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email" inputmode="email">
+    </div>
+    <div class="input-group">
+      <i class="fas fa-lock"></i>
+      <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+    </div>
+    <button id="loginBtn" onclick="login()">Sign In</button>
+    <div id="authError" class="error"></div>
+  </div>
+</div>
+
+<!-- USER DASHBOARD -->
+<div id="userDashboard" class="hidden">
+  <div id="offlineBar" class="offline-bar hidden">
+    <i class="fas fa-wifi"></i> Connection lost — trying to reconnect...
+  </div>
+
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="nav-logo"><i class="fas fa-chart-line"></i></div>
+      <div class="nav-titles">
+        <div class="t1">Axim Financial Solution</div>
+        <div class="t2">by GreenOOH</div>
+      </div>
+    </div>
+    <div class="nav-user">
+      <span class="live-badge"><span class="live-dot"></span>Live</span>
+      <div class="user-chip">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span class="user-name-txt" id="userName">Loading...</span>
+      </div>
+      <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="summary-cards">
+      <div class="card" id="cardInvested">
+        <div class="card-icon-wrap invested"><i class="fas fa-wallet"></i></div>
+        <div class="card-content">
+          <h3>Invested</h3>
+          <p id="totalInvested"><span class="skeleton skeleton-number"></span></p>
+        </div>
+      </div>
+      <div class="card" id="cardCurrent">
+        <div class="card-icon-wrap current"><i class="fas fa-chart-pie"></i></div>
+        <div class="card-content">
+          <h3>Current Value</h3>
+          <p id="currentValue"><span class="skeleton skeleton-number"></span></p>
+        </div>
+      </div>
+      <div class="card" id="cardPnl">
+        <div class="card-icon-wrap pnl" id="pnlIconWrap"><i class="fas fa-chart-line" id="pnlIcon"></i></div>
+        <div class="card-content">
+          <h3>Total P&amp;L</h3>
+          <p id="totalPnL"><span class="skeleton skeleton-number"></span></p>
+          <small id="pnlPercentage"></small>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <label><i class="fas fa-filter"></i> Filter by Date</label>
+      <input type="date" id="startDate">
+      <span class="filter-sep">to</span>
+      <input type="date" id="endDate">
+      <div class="filter-btn-row">
+        <button onclick="filterByDate()" class="filter-btn apply">Apply</button>
+        <button onclick="resetFilter()" class="filter-btn reset">Reset</button>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title"><i class="fas fa-history"></i><h2>Transaction History</h2></div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>Date &amp; Time</th><th>Type</th><th>Amount</th><th>P&amp;L</th><th>Current Value</th><th>Notes</th></tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr><td colspan="6"><div class="empty-state"><i class="fas fa-circle-notch fa-spin"></i><p>Loading transactions...</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title"><i class="fas fa-chart-area"></i><h2>P&amp;L Over Time</h2></div>
+      <div class="chart-container"><canvas id="pnlChart"></canvas></div>
+    </div>
+
+    <div class="footer-note">Axim Financial Solution &middot; by GreenOOH<br>Data updates in real time</div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+<script>
+// ============================================
+// STEP 1: REPLACE WITH YOUR FIREBASE CONFIG
+// (same config used in admin.html)
+// ============================================
+const firebaseConfig = {
+  apiKey: "AIzaSyA15n-4o5_PFmBaX-foNGKJGEGyF6Blmhk",
+  authDomain: "axim-fin.firebaseapp.com",
+  databaseURL: "https://axim-fin-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "axim-fin",
+  storageBucket: "axim-fin.firebasestorage.app",
+  messagingSenderId: "547222411923",
+  appId: "1:547222411923:web:76a23e02178255effbcb66",
+  measurementId: "G-SC590PJFJ4"
+};
+// ============================================
+
+let firebaseReady = false;
+try {
+  firebase.initializeApp(firebaseConfig);
+  firebaseReady = true;
+} catch (e) {
+  console.error('Firebase init failed:', e);
+}
+
+const auth = firebaseReady ? firebase.auth() : null;
+const database = firebaseReady ? firebase.database() : null;
+
+let currentUser = null;
+let allTransactions = [];
+let pnlChart = null;
+let lastPnl = null;
+let listenersAttached = false;
+
+// ============================================
+// TOAST NOTIFICATIONS
+// ============================================
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info';
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+// ============================================
+// BOOT SEQUENCE
+// ============================================
+function hideBootLoader() {
+  const loader = document.getElementById('bootLoader');
+  if (loader) loader.style.display = 'none';
+}
+
+if (!firebaseReady) {
+  hideBootLoader();
+  document.getElementById('authPage').classList.remove('hidden');
+  showToast('Configuration error. Please contact support.', 'error');
+} else {
+  auth.onAuthStateChanged(user => {
+    hideBootLoader();
+    if (!user) { showAuth(); return; }
+    currentUser = user;
+    showDashboard();
+    if (!listenersAttached) {
+      listenUserData();
+      listenTransactions();
+      listenConnectionState();
+      listenersAttached = true;
+    }
+  }, error => {
+    hideBootLoader();
+    console.error('Auth state error:', error);
+    showAuth();
+    showToast('Session error. Please log in again.', 'error');
+  });
+}
+
+function showAuth() {
+  document.getElementById('authPage').classList.remove('hidden');
+  document.getElementById('userDashboard').classList.add('hidden');
+}
+function showDashboard() {
+  document.getElementById('authPage').classList.add('hidden');
+  document.getElementById('userDashboard').classList.remove('hidden');
+}
+
+// ============================================
+// LOGIN
+// ============================================
+async function login() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+
+  if (!email || !password) { showAuthError('Please enter email and password'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (error) {
+    let msg = 'Invalid email or password';
+    if (error.code === 'auth/too-many-requests') msg = 'Too many attempts. Please wait and try again.';
+    if (error.code === 'auth/network-request-failed') msg = 'Network error. Check your connection.';
+    if (error.code === 'auth/user-disabled') msg = 'This account has been disabled.';
+    showAuthError(msg);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  setTimeout(() => el.textContent = '', 5000);
+}
+
+function logout() {
+  if (confirm('Are you sure you want to logout?')) {
+    auth.signOut().catch(e => console.error('Logout error:', e));
+  }
+}
+
+// ============================================
+// CONNECTION STATE
+// ============================================
+function listenConnectionState() {
+  database.ref('.info/connected').on('value', snap => {
+    const bar = document.getElementById('offlineBar');
+    if (snap.val() === true) {
+      bar.classList.add('hidden');
+    } else {
+      bar.classList.remove('hidden');
+    }
+  });
+}
+
+// ============================================
+// LIVE: users/{uid} listener
+// ============================================
+function listenUserData() {
+  database.ref('users/' + currentUser.uid).on('value', snapshot => {
+    const data = snapshot.val();
+    if (!data) {
+      showToast('Profile data not found. Please contact your administrator.', 'error');
+      return;
+    }
+
+    const name = data.name || 'User';
+    document.getElementById('userName').textContent = name;
+    document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+
+    document.getElementById('totalInvested').textContent = formatCurrency(data.totalInvested || 0);
+    document.getElementById('currentValue').textContent = formatCurrency(data.currentValue || 0);
+
+    const pnl = data.totalPnL || 0;
+    const pnlPct = data.pnlPercentage || 0;
+
+    document.getElementById('totalPnL').textContent = formatCurrency(pnl);
+    document.getElementById('pnlPercentage').textContent = (pnl >= 0 ? '▲ ' : '▼ ') + Math.abs(pnlPct).toFixed(2) + '%';
+
+    const pnlTextEl = document.getElementById('totalPnL');
+    const pnlIconWrap = document.getElementById('pnlIconWrap');
+    const pnlIcon = document.getElementById('pnlIcon');
+    const pnlPctEl = document.getElementById('pnlPercentage');
+
+    if (pnl > 0) {
+      pnlTextEl.style.color = 'var(--success)';
+      pnlPctEl.style.color = 'var(--success)';
+      pnlIconWrap.style.background = '#ecfdf5';
+      pnlIconWrap.style.color = 'var(--success)';
+      pnlIcon.className = 'fas fa-arrow-trend-up';
+    } else if (pnl < 0) {
+      pnlTextEl.style.color = 'var(--danger)';
+      pnlPctEl.style.color = 'var(--danger)';
+      pnlIconWrap.style.background = '#fef2f2';
+      pnlIconWrap.style.color = 'var(--danger)';
+      pnlIcon.className = 'fas fa-arrow-trend-down';
+    } else {
+      pnlTextEl.style.color = 'var(--text-dark)';
+      pnlPctEl.style.color = 'var(--text-mid)';
+      pnlIconWrap.style.background = '#fff7ed';
+      pnlIconWrap.style.color = 'var(--warning)';
+      pnlIcon.className = 'fas fa-chart-line';
+    }
+
+    if (lastPnl !== null && lastPnl !== pnl) {
+      flashCard('cardPnl');
+      flashCard('cardCurrent');
+      showToast('Your portfolio has been updated', 'info');
+    }
+    lastPnl = pnl;
+  }, error => {
+    console.error('User data listener error:', error);
+    showToast('Unable to load your data. Please refresh the page.', 'error');
+  });
+}
+
+function flashCard(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('updated');
+  void el.offsetWidth;
+  el.classList.add('updated');
+}
+
+// ============================================
+// LIVE: transactions/{uid} listener
+// ============================================
+function listenTransactions() {
+  database.ref('transactions/' + currentUser.uid).on('value', snapshot => {
+    allTransactions = [];
+    const data = snapshot.val();
+    if (data) {
+      Object.keys(data).forEach(key => allTransactions.push({ id: key, ...data[key] }));
+      allTransactions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      displayTransactions(allTransactions, true);
+      updateChart(allTransactions);
+    } else {
+      renderEmptyHistory();
+      updateChart([]);
+    }
+  }, error => {
+    console.error('Transactions listener error:', error);
+    document.getElementById('historyBody').innerHTML =
+      `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-triangle-exclamation"></i><p>Unable to load transactions. Please refresh.</p></div></td></tr>`;
+  });
+}
+
+function renderEmptyHistory() {
+  document.getElementById('historyBody').innerHTML =
+    `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>No transactions yet. Your admin will add entries here.</p></div></td></tr>`;
+}
+
+function displayTransactions(transactions, highlightFirst) {
+  const tbody = document.getElementById('historyBody');
+  if (!transactions || transactions.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-magnifying-glass"></i><p>No transactions found for this range.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = transactions.map((tx, i) => {
+    const date = new Date(tx.timestamp || 0);
+    const dateStr = date.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+    const timeStr = date.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+    const typeClass = tx.type === 'Deposit' ? 'deposit' : tx.type === 'Withdrawal' ? 'withdrawal' : 'trade';
+    const pnl = tx.pnl || 0;
+    const pnlClass = pnl >= 0 ? 'positive' : 'negative';
+    const rowClass = (highlightFirst && i === 0) ? 'new-row' : '';
+
+    return `
+      <tr class="${rowClass}">
+        <td><div class="datetime">${dateStr}</div><small class="time">${timeStr}</small></td>
+        <td><span class="type-badge ${typeClass}">${tx.type || 'N/A'}</span></td>
+        <td>${formatCurrency(tx.amount || 0)}</td>
+        <td class="${pnlClass}">${pnl >= 0 ? '+' : ''}${formatCurrency(pnl)}</td>
+        <td>${formatCurrency(tx.currentValue || 0)}</td>
+        <td class="notes-cell" title="${(tx.notes||'').replace(/"/g,'&quot;')}">${tx.notes || '—'}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterByDate() {
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  if (!startDate || !endDate) { showToast('Please select both start and end date', 'error'); return; }
+
+  const start = new Date(startDate).setHours(0,0,0,0);
+  const end = new Date(endDate).setHours(23,59,59,999);
+  if (start > end) { showToast('Start date must be before end date', 'error'); return; }
+
+  const filtered = allTransactions.filter(tx => tx.timestamp >= start && tx.timestamp <= end);
+  displayTransactions(filtered, false);
+  updateChart(filtered);
+}
+
+function resetFilter() {
+  document.getElementById('startDate').value = '';
+  document.getElementById('endDate').value = '';
+  displayTransactions(allTransactions, false);
+  updateChart(allTransactions);
+}
+
+function updateChart(transactions) {
+  const canvas = document.getElementById('pnlChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const dailyData = {};
+  transactions.forEach(tx => {
+    const date = new Date(tx.timestamp || 0).toLocaleDateString('en-IN');
+    if (!dailyData[date]) dailyData[date] = { pnl: 0 };
+    dailyData[date].pnl += (tx.pnl || 0);
+  });
+
+  const dates = Object.keys(dailyData).sort((a,b) => {
+    const da = new Date(a.split('/').reverse().join('-'));
+    const db = new Date(b.split('/').reverse().join('-'));
+    return da - db;
+  });
+  const pnlData = dates.map(d => dailyData[d].pnl);
+
+  if (pnlChart) pnlChart.destroy();
+
+  if (dates.length === 0) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    return;
+  }
+
+  const isMobile = window.innerWidth < 481;
+
+  pnlChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: 'Cumulative P&L (₹)',
+        data: pnlData,
+        borderColor: '#4f46e5',
+        backgroundColor: 'rgba(79,70,229,0.08)',
+        tension: 0.4,
+        fill: true,
+        pointRadius: isMobile ? 2 : 3,
+        pointBackgroundColor: '#4f46e5'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { font: { family: 'Inter', weight:'600', size: isMobile ? 11 : 12 } } }
+      },
+      scales: {
+        y: { beginAtZero:false, grid:{ color:'rgba(0,0,0,0.06)' }, ticks:{ font:{ family:'Inter', size: isMobile ? 10 : 12 } } },
+        x: { grid:{ display:false }, ticks:{ font:{ family:'Inter', size: isMobile ? 9 : 12 }, maxRotation: isMobile ? 45 : 0 } }
+      }
+    }
+  });
+}
+
+function formatCurrency(amount) {
+  const num = typeof amount === 'number' && !isNaN(amount) ? amount : 0;
+  return '₹' + Math.abs(num).toLocaleString('en-IN', { maximumFractionDigits:2, minimumFractionDigits:2 });
+}
+
+window.addEventListener('error', function(e) {
+  console.error('Unhandled error:', e.error || e.message);
+});
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('Unhandled promise rejection:', e.reason);
+});
+
+// Re-render chart with correct point size if screen size changes (e.g. rotation)
+let resizeTimer;
+window.addEventListener('resize', function() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (allTransactions.length > 0) updateChart(allTransactions);
+  }, 300);
+});
+</script>
+</body>
+</html>
